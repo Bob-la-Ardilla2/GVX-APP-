@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GVX Roleplay Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d1b2e);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #2d1b2e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .gvx-logo {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #ff3333, #cc0000);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            position: relative;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(255, 51, 51, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(255, 51, 51, 1); }
+            100% { box-shadow: 0 0 20px rgba(255, 51, 51, 0.8); }
+        }
+
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 300px;
+        }
+
+        .login-btn {
+            background: linear-gradient(45deg, #ff3333, #cc0000);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.4);
+        }
+
+        .email-verification {
+            display: none;
+        }
+
+        .username-setup {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .username-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ff3333;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            width: 250px;
+        }
+
+        .main-app {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 80px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 2px solid #ff3333;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 51, 51, 0.2);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -25%;
+            width: 25%;
+            height: 100vh;
+            background: rgba(26, 26, 26, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 200;
+            transition: left 0.3s ease;
+            padding: 80px 0 20px 0;
+            border-right: 2px solid #ff3333;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            display: none;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .sidebar-item {
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 51, 51, 0.1);
+            border-left-color: #ff3333;
+        }
+
+        .sidebar-item.active {
+            background: rgba(255, 51, 51, 0.2);
+            border-left-color: #ff3333;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-text {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff3333, #cc0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .server-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 51, 51, 0.3);
+        }
+
+        .section {
+            display: none;
+            animation: slideInFromLeft 0.5s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .ranking-section {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid #ff3333;
+        }
+
+        .ranking-title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ff3333;
+        }
+
+        .ranking-subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .ranking-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-left: 4px solid #ff3333;
+        }
+
+        .rank-number {
+            background: #ff3333;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .rank-status {
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 51, 51, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .promote-section {
+            background: rgba(255, 51, 51, 0.1);
+            border: 2px solid #ff3333;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .promote-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff3333;
+        }
+
+        .promote-text {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+
+        .history-content {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #ff3333;
+            line-height: 1.8;
+        }
+
+        .history-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ff3333;
+        }
+
+        .history-subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(26, 26, 26, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 300;
+            transition: right 0.3s ease;
+            padding: 80px 20px 20px 20px;
+            border-left: 2px solid #ff3333;
+        }
+
+        .admin-panel.open {
+            right: 0;
+        }
+
+        .admin-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff3333;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            z-index: 400;
+            font-size: 16px;
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .admin-input, .admin-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ff3333;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .admin-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .admin-btn {
+            background: #ff3333;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 75%;
+                left: -75%;
+            }
+            
+            .content {
+                padding: 0 10px;
+            }
+            
+            .ranking-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="gvx-logo">GVX</div>
+        
+        <div class="login-options" id="loginOptions">
+            <button class="login-btn" onclick="showUsernameSetup()">
+                🚀 Ingresar
+            </button>
+        </div>
+
+        <div class="username-setup" id="usernameSetup">
+            <h3>Configura tu usuario</h3>
+            <input type="text" class="username-input" id="usernameInput" placeholder="Ingresa tu nombre de usuario">
+            <button class="login-btn" onclick="completeSetup()">Continuar</button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="main-app" id="mainApp">
+        <div class="header">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="header-title" id="headerTitle">Historia de GVX</div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-item active" onclick="showSection('history')" data-section="history">
+                📖 Historia de GVX
+            </div>
+            <div class="sidebar-item" onclick="showSection('staff')" data-section="staff">
+                👑 Staff del Mes
+            </div>
+            <div class="sidebar-item" onclick="showSection('player')" data-section="player">
+                🏆 Jugador del Mes
+            </div>
+            <div class="sidebar-item" onclick="showSection('host')" data-section="host">
+                🎧 Host del Mes
+            </div>
+            <div class="sidebar-footer">GVX Roleplay Server © 2025</div>
+        </div>
+
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <div class="content">
+            <div class="welcome-section">
+                <div class="welcome-text" id="welcomeText">Bienvenido a GVX APP</div>
+                <div class="server-info" style="background: #666; color: white; text-align: center; padding: 20px; border-radius: 10px;">
+                    GreenVX servidor de greenville hispano
+                </div>
+            </div>
+
+            <!-- Historia Section -->
+            <div class="section active" id="historySection">
+                <div class="history-content">
+                    <div class="history-title">La Historia de GVX</div>
+                    <div class="history-subtitle">Una historia de perseverancia, comunidad y pasión por el roleplay</div>
+                    <p style="margin-bottom: 20px;">
+                        Todo comenzó with Andrés, mejor conocido como Bob la Ardilla, quien formaba parte del equipo de staff del servidor GVRP. Un día clave en la historia, el 13 de marzo de 2025, ocurrió un raid que afectó gravemente al servidor. Este evento impulsó a varios miembros del staff a unirse y crear algo nuevo, algo mejor: así nació GVX.
+                    </p>
+                    <p style="margin-bottom: 20px;">
+                        El servidor GVX se lanzó con fuerza y rápidamente atrajo a más de 80 jugadores en sus primeras semanas. Sin embargo, el owner principal no contaba con suficiente tiempo para supervisar el proyecto, y muchos de los otros staff no se comprometían lo suficiente. Como resultado, el servidor tuvo que cerrar temporalmente.
+                    </p>
+                    <p style="margin-bottom: 20px;">
+                        Pero la historia no terminó ahí. El 29 de julio de 2025, Bob junto con Alonso decidieron revivir GVX. Esta vez con más experiencia, recursos, tiempo y un equipo más comprometido. La visión era clara: crear un servidor de roleplay que no solo fuera divertido, sino también profesional, estructurado y sostenible en el tiempo.
+                    </p>
+                    <p>
+                        Desde entonces, GVX ha evolucionado para convertirse en una comunidad vibrante y activa, con eventos mensuales, staff capacitado, y una estructura que premia el esfuerzo y la dedicación de sus miembros. Este renacer marcó una nueva era para el proyecto, una donde cada jugador importa, y donde el roleplay se vive con intensidad y respeto.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Staff del Mes Section -->
+            <div class="section" id="staffSection">
+                <div class="ranking-section">
+                    <div class="ranking-title">Staff del Mes</div>
+                    <div class="ranking-subtitle">Los mejores administradores y moderadores</div>
+                    
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #FFD700;">1</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="staff1">andresleonj1</div>
+                            <div class="rank-status">Primer lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #C0C0C0;">2</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="staff2">Por definir</div>
+                            <div class="rank-status">Segundo lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #CD7F32;">3</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="staff3">Por definir</div>
+                            <div class="rank-status">Tercer lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number">4</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="staff4">Por definir</div>
+                            <div class="rank-status">Cuarto lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number">5</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="staff5">Por definir</div>
+                            <div class="rank-status">Quinto lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="promote-section">
+                        <div class="promote-title">¿Quieres aparecer aquí?</div>
+                        <div class="promote-text">
+                            Demuestra tu dedicación y compromiso con la comunidad GVX para ser reconocido como uno de los mejores staff del mes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jugador del Mes Section -->
+            <div class="section" id="playerSection">
+                <div class="ranking-section">
+                    <div class="ranking-title">Jugador del Mes</div>
+                    <div class="ranking-subtitle">Los roleplayers más destacados</div>
+                    
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #FFD700;">1</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="player1">Por definir</div>
+                            <div class="rank-status">Primer lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #C0C0C0;">2</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="player2">Por definir</div>
+                            <div class="rank-status">Segundo lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #CD7F32;">3</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="player3">Por definir</div>
+                            <div class="rank-status">Tercer lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number">4</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="player4">Por definir</div>
+                            <div class="rank-status">Cuarto lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number">5</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="player5">Por definir</div>
+                            <div class="rank-status">Quinto lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="promote-section">
+                        <div class="promote-title">¿Quieres aparecer aquí?</div>
+                        <div class="promote-text">
+                            Demuestra tu dedicación y compromiso con la comunidad GVX para ser reconocido como uno de los mejores jugadores del mes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Host del Mes Section -->
+            <div class="section" id="hostSection">
+                <div class="ranking-section">
+                    <div class="ranking-title">Host del Mes</div>
+                    <div class="ranking-subtitle">Los mejores organizadores de eventos</div>
+                    
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #FFD700;">1</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="host1">Por definir</div>
+                            <div class="rank-status">Primer lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #C0C0C0;">2</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="host2">Por definir</div>
+                            <div class="rank-status">Segundo lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number" style="background: #CD7F32;">3</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="host3">Por definir</div>
+                            <div class="rank-status">Tercer lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number">4</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="host4">Por definir</div>
+                            <div class="rank-status">Cuarto lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number">5</div>
+                        <div class="rank-info">
+                            <div class="rank-name" id="host5">Por definir</div>
+                            <div class="rank-status">Quinto lugar</div>
+                        </div>
+                    </div>
+
+                    <div class="promote-section">
+                        <div class="promote-title">¿Quieres aparecer aquí?</div>
+                        <div class="promote-text">
+                            Demuestra tu dedicación y compromiso con la comunidad GVX para ser reconocido como uno de los mejores hosts del mes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <button class="admin-toggle" onclick="toggleAdmin()" id="adminToggle" style="display: none;">⚙️</button>
+        <div class="admin-panel" id="adminPanel">
+            <h3 style="margin-bottom: 20px; color: #ff3333;">Panel de Administración</h3>
+            <div class="admin-form">
+                <select class="admin-select" id="categorySelect">
+                    <option value="staff">Staff del Mes</option>
+                    <option value="player">Jugador del Mes</option>
+                    <option value="host">Host del Mes</option>
+                </select>
+                
+                <select class="admin-select" id="positionSelect">
+                    <option value="1">Primer lugar</option>
+                    <option value="2">Segundo lugar</option>
+                    <option value="3">Tercer lugar</option>
+                    <option value="4">Cuarto lugar</option>
+                    <option value="5">Quinto lugar</option>
+                </select>
+                
+                <input type="text" class="admin-input" id="winnerName" placeholder="Nombre del ganador">
+                <button class="admin-btn" onclick="updateWinner()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = '';
+        let currentSection = 'history';
+
+        // Data storage
+        let rankingData = {
+            staff: ['Por definir', 'Por definir', 'Por definir', 'Por definir', 'Por definir'],
+            player: ['Por definir', 'Por definir', 'Por definir', 'Por definir', 'Por definir'],
+            host: ['Por definir', 'Por definir', 'Por definir', 'Por definir', 'Por definir']
+        };
+
+        // Authentication functions
+        function showUsernameSetup() {
+            document.getElementById('loginOptions').style.display = 'none';
+            document.getElementById('usernameSetup').style.display = 'flex';
+        }
+
+        function completeSetup() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username) {
+                currentUser = username;
+                document.getElementById('welcomeText').textContent = `Bienvenido a GVX APP ${username}`;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                // Check if user is admin
+                if (username.toLowerCase() === 'bob' || username.toLowerCase() === 'admin') {
+                    document.getElementById('adminToggle').style.display = 'block';
+                }
+            } else {
+                alert('Por favor ingresa un nombre de usuario');
+            }
+        }
+
+        // Navigation functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        function showSection(section) {
+            // Update active sidebar item
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Show selected section with animation
+            document.getElementById(`${section}Section`).classList.add('active');
+
+            // Update header title
+            const titles = {
+                'history': 'Historia de GVX',
+                'staff': 'Staff del Mes',
+                'player': 'Jugador del Mes',
+                'host': 'Host del Mes'
+            };
+            document.getElementById('headerTitle').textContent = titles[section];
+
+            currentSection = section;
+            closeSidebar();
+        }
+
+        // Admin functions
+        function toggleAdmin() {
+            const adminPanel = document.getElementById('adminPanel');
+            adminPanel.classList.toggle('open');
+        }
+
+        function updateWinner() {
+            const category = document.getElementById('categorySelect').value;
+            const position = document.getElementById('positionSelect').value;
+            const name = document.getElementById('winnerName').value.trim();
+
+            if (name) {
+                document.getElementById(`${category}${position}`).textContent = name;
+                document.getElementById('winnerName').value = '';
+                saveRankingData();
+                alert('Ganador actualizado exitosamente');
+            } else {
+                alert('Por favor ingresa un nombre');
+            }
+        }
+
+        // Data persistence functions
+        function saveRankingData() {
+            for (let category in rankingData) {
+                for (let i = 1; i <= 5; i++) {
+                    const element = document.getElementById(`${category}${i}`);
+                    if (element) {
+                        rankingData[category][i-1] = element.textContent;
+                    }
+                }
+            }
+        }
+
+        function loadRankingData() {
+            for (let category in rankingData) {
+                for (let i = 1; i <= 5; i++) {
+                    const element = document.getElementById(`${category}${i}`);
+                    if (element && rankingData[category][i-1]) {
+                        element.textContent = rankingData[category][i-1];
+                    }
+                }
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('App initialized');
+            loadRankingData();
+            
+            // Check for direct login parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const directLogin = urlParams.get('user');
+            
+            if (directLogin) {
+                currentUser = directLogin;
+                document.getElementById('welcomeText').textContent = `Bienvenido a GVX APP ${directLogin}`;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                if (directLogin.toLowerCase() === 'bob' || directLogin.toLowerCase() === 'admin') {
+                    document.getElementById('adminToggle').style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
